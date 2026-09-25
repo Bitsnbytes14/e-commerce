@@ -15,6 +15,10 @@ analysis/profile_dataset.py      Reproducible data-profile and extract script
 analysis/dataset_profile.json    Validated KPI and data-quality output
 analysis/tableau_ready/          CSVs prepared at safe analytical grains
 CA3_TABLEAU_PROJECT_GUIDE.md     Dashboard plan, findings, methodology, slides, viva Q&A
+backend/                         FastAPI API, SQLite database builder, and regression tests
+frontend/                        React/Vite analytics dashboard
+.github/workflows/ci.yml         Data, API, lint, and production-build CI checks
+render.yaml                      Render deployment configuration for the API
 ```
 
 ## Requirements
@@ -58,7 +62,16 @@ The script does not change the raw files in `archive/`. It validates the source 
 
 ## Run the web dashboard
 
-The `frontend/` directory contains a responsive React + Vite analytics dashboard. It displays the validated project metrics, monthly performance, payment mix, category performance, delivery experience, cross-sell opportunities, and seller scorecard.
+The `frontend/` directory contains a responsive React + Vite analytics dashboard. It displays validated KPI cards, monthly performance, payment mix, category performance, delivery experience, cross-sell opportunities, seller scorecards, data-integrity checks, and an item-level drill-down table.
+
+### Dashboard capabilities
+
+- API-backed filters for date range, category, seller, payment method, review band, and delivery punctuality.
+- Filter state saved in the URL so a copied link reopens the same view.
+- CSV export of the currently filtered monthly trend.
+- Static validated-data fallback when the API is unavailable, plus a retryable error state when required dashboard data cannot load.
+- Clear distinction between payment revenue (order level) and item revenue (product/seller level).
+- Source-defined location disclaimer; no real-world geographic claims.
 
 ```powershell
 cd frontend
@@ -76,7 +89,7 @@ The dashboard reads `frontend/public/dashboard-data.json`. Regenerate it along w
 
 ## Run the API and analytical database
 
-The FastAPI service provides production-style, read-only endpoints for health checks, quality metadata, KPIs/trends, categories, and sellers. Build the SQLite database after regenerating extracts:
+The FastAPI service provides production-style, read-only endpoints for health checks, quality metadata, filtered KPIs/trends, categories, sellers, and item drill-down. Build the SQLite database after regenerating extracts:
 
 ```powershell
 python backend/build_database.py
@@ -84,6 +97,8 @@ uvicorn backend.app:app --reload
 ```
 
 The API is then available at `http://127.0.0.1:8000`, with interactive OpenAPI documentation at `/docs`. Start the frontend in another terminal; Vite proxies `/api` requests to this local service. For a separate deployed API, set `VITE_API_BASE_URL` to its public origin.
+
+Available API endpoints: `/api/health`, `/api/quality`, `/api/overview`, `/api/categories`, `/api/sellers`, and `/api/order-details`.
 
 ## Verification and continuous integration
 
@@ -94,13 +109,14 @@ npm run lint
 npm run build
 ```
 
-GitHub Actions repeats the extract generation, API checks, linting, and production build for pushes and pull requests. The database itself is intentionally ignored because it is reproducibly built from versioned extracts.
+GitHub Actions repeats the extract generation, database build, API regression checks, linting, and production build for pushes and pull requests. The database itself is intentionally ignored because it is reproducibly built from versioned extracts.
 
 ## Deployment
 
 1. Deploy the repository root to Render using `render.yaml`; it provisions the API, regenerates the extracts/database, and exposes `/api/health`.
-2. Deploy `frontend/` to Vercel. Set the build command to `npm run build`, the output directory to `dist`, and environment variable `VITE_API_BASE_URL` to the Render API origin (for example, `https://commerceiq-api.onrender.com`).
-3. Verify `/api/health`, `/docs`, the deployed dashboard, and the location-disclaimer text before sharing the URL.
+2. In Render, set `CORS_ORIGINS` to the deployed Vercel URL (for example, `https://your-project.vercel.app`). This authorizes browser API requests only from that frontend.
+3. Deploy `frontend/` to Vercel. Set the build command to `npm run build`, the output directory to `dist`, and environment variable `VITE_API_BASE_URL` to the Render API origin (for example, `https://commerceiq-api.onrender.com`).
+4. Verify `/api/health`, `/docs`, the deployed dashboard, filters, CSV export, and the location-disclaimer text before sharing the URL.
 
 ## Validated baseline (delivered orders)
 

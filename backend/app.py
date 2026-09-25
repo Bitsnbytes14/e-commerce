@@ -1,6 +1,7 @@
 """Read-only API for the CommerceIQ analytics dashboard."""
 from pathlib import Path
 import json
+import os
 import sqlite3
 from typing import Annotated
 from fastapi import FastAPI, Query
@@ -11,7 +12,12 @@ DB_PATH = Path(__file__).with_name("commerceiq.db")
 PROFILE = ROOT / "analysis" / "dataset_profile.json"
 
 app = FastAPI(title="CommerceIQ Analytics API", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["GET"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:5173").split(","),
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 def connect():
     if not DB_PATH.exists():
