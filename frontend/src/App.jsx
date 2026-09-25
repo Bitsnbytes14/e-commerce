@@ -6,6 +6,17 @@ const money = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
 const decimal = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 const chartColors = ['#14b8a6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#64748b']
 
+function downloadCsv(rows, filename) {
+  const header = 'month,payment_revenue,completed_orders'
+  const values = rows.map(row => `${row.month},${row.revenue},${row.orders}`)
+  const url = URL.createObjectURL(new Blob([[header, ...values].join('\n')], { type: 'text/csv;charset=utf-8' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function Card({ label, value, hint, tone = 'teal' }) {
   return <article className={`metric-card ${tone}`}><span>{label}</span><strong>{value}</strong><small>{hint}</small></article>
 }
@@ -53,7 +64,7 @@ function App() {
         <Card label="Customer rating" value={`${decimal.format(k.average_review_score)} / 5`} hint="Mean order-level review" tone="amber" />
       </section>
       <section className="dashboard-grid">
-        <Panel title="Revenue movement" subtitle="Monthly payment revenue and delivered orders" className="trend-panel"><ResponsiveContainer width="100%" height={270}><LineChart data={data.monthly} margin={{ top: 18, right: 8, left: 0 }}><CartesianGrid vertical={false} stroke="#e8edf4"/><XAxis dataKey="month" tick={{ fontSize: 11 }} interval="preserveStartEnd"/><YAxis yAxisId="left" tickFormatter={v => `${Math.round(v / 1000)}k`} tick={{ fontSize: 11 }}/><YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }}/><Tooltip formatter={(v, n) => [money.format(v), n]}/><Line yAxisId="left" type="monotone" dataKey="revenue" name="Revenue" stroke="#14b8a6" strokeWidth={3} dot={false}/><Line yAxisId="right" type="monotone" dataKey="orders" name="Orders" stroke="#3b82f6" strokeWidth={2} dot={false}/></LineChart></ResponsiveContainer></Panel>
+        <Panel title="Revenue movement" subtitle="Monthly payment revenue and delivered orders" className="trend-panel"><button className="export-button" onClick={() => downloadCsv(data.monthly, 'commerceiq-monthly-performance.csv')}>↓ Export CSV</button><ResponsiveContainer width="100%" height={270}><LineChart data={data.monthly} margin={{ top: 18, right: 8, left: 0 }}><CartesianGrid vertical={false} stroke="#e8edf4"/><XAxis dataKey="month" tick={{ fontSize: 11 }} interval="preserveStartEnd"/><YAxis yAxisId="left" tickFormatter={v => `${Math.round(v / 1000)}k`} tick={{ fontSize: 11 }}/><YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }}/><Tooltip formatter={(v, n) => [money.format(v), n]}/><Line yAxisId="left" type="monotone" dataKey="revenue" name="Revenue" stroke="#14b8a6" strokeWidth={3} dot={false}/><Line yAxisId="right" type="monotone" dataKey="orders" name="Orders" stroke="#3b82f6" strokeWidth={2} dot={false}/></LineChart></ResponsiveContainer></Panel>
         <Panel title="Payment mix" subtitle="Raw payment-component revenue share"><div className="donut-wrap"><ResponsiveContainer width="50%" height={205}><PieChart><Pie data={data.payments} dataKey="revenue" nameKey="payment_type" innerRadius={54} outerRadius={78} paddingAngle={3}>{data.payments.map((x, i) => <Cell key={x.payment_type} fill={chartColors[i]} />)}</Pie><Tooltip formatter={v => money.format(v)} /></PieChart></ResponsiveContainer><div className="legend">{data.payments.slice(0, 4).map((x, i) => <div key={x.payment_type}><i style={{ background: chartColors[i] }}></i><span>{x.payment_type.replace('_', ' ')}</span><b>{x.share_pct}%</b></div>)}</div></div></Panel>
         <Panel title="Category performance" subtitle="Item revenue; filterable category snapshot"><ResponsiveContainer width="100%" height={290}><BarChart data={visibleCategories.slice(0, 7)} layout="vertical" margin={{ left: 10, right: 35 }}><XAxis type="number" hide/><YAxis type="category" dataKey="category" width={130} tick={{ fontSize: 11 }}/><Tooltip formatter={v => money.format(v)} /><Bar dataKey="revenue" name="Item revenue" radius={[0, 6, 6, 0]} fill="#3b82f6"><LabelList dataKey="revenue" position="right" formatter={v => `${Math.round(v / 1000)}k`} style={{ fontSize: 11, fill: '#64748b' }}/></Bar></BarChart></ResponsiveContainer></Panel>
         <Panel title="Delivery experience" subtitle="Satisfaction falls sharply as delivery becomes late"><div className="delivery-bars">{data.delivery_rating.map((x, i) => <div className="delivery-row" key={x.band}><div><b>{x.band}</b><small>{money.format(x.orders)} orders</small></div><div className="rating-track"><span style={{ width: `${x.rating * 20}%`, background: chartColors[i === 2 ? 4 : i] }}></span></div><strong>{x.rating}</strong></div>)}</div><div className="delivery-kpis"><div><b>{decimal.format(k.average_delivery_days)} days</b><span>Average delivery time</span></div><div><b>{k.on_or_before_estimated_delivery_pct}%</b><span>On / before estimate</span></div></div></Panel>
