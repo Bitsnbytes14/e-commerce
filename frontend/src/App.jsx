@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import './App.css'
+import './quality.css'
 
 const money = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
 const decimal = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
@@ -39,7 +40,8 @@ function App() {
     Promise.all([
       fetch('/dashboard-data.json').then(r => r.json()),
       fetch(overviewUrl).then(r => r.ok ? r.json() : null).catch(() => null),
-    ]).then(([staticData, overview]) => setData(overview ? { ...staticData, kpis: overview.kpis, monthly: overview.monthly } : staticData))
+      fetch(`${apiBase}/api/quality`).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([staticData, overview, quality]) => setData({ ...staticData, ...(overview ? { kpis: overview.kpis, monthly: overview.monthly } : {}), ...(quality ? { data_quality: quality.data_quality } : {}) }))
   }, [startDate, endDate])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
@@ -70,6 +72,7 @@ function App() {
         <Panel title="Delivery experience" subtitle="Satisfaction falls sharply as delivery becomes late"><div className="delivery-bars">{data.delivery_rating.map((x, i) => <div className="delivery-row" key={x.band}><div><b>{x.band}</b><small>{money.format(x.orders)} orders</small></div><div className="rating-track"><span style={{ width: `${x.rating * 20}%`, background: chartColors[i === 2 ? 4 : i] }}></span></div><strong>{x.rating}</strong></div>)}</div><div className="delivery-kpis"><div><b>{decimal.format(k.average_delivery_days)} days</b><span>Average delivery time</span></div><div><b>{k.on_or_before_estimated_delivery_pct}%</b><span>On / before estimate</span></div></div></Panel>
         <Panel title="Cross-sell opportunities" subtitle="Distinct category pairs in the same delivered order"><ol>{data.cross_sell.slice(0, 5).map((x, i) => <li key={`${x.category_1}-${x.category_2}`}><em>{String(i + 1).padStart(2, '0')}</em><div><b>{x.category_1.replaceAll('_', ' ')} <span>+</span> {x.category_2.replaceAll('_', ' ')}</b><small>Observed together in completed orders</small></div><strong>{x.orders}</strong></li>)}</ol></Panel>
         <Panel title="Seller scorecard" subtitle="Top sellers by item revenue and average rating"><div className="seller-table"><div className="seller-head"><span>Seller ID</span><span>Orders</span><span>Rating</span><span>Revenue</span></div>{data.sellers.slice(0, 5).map(s => <div className="seller-row" key={s.seller_id}><span title={s.seller_id}>{s.seller_id.slice(0, 8)}…</span><span>{money.format(s.orders)}</span><span className={s.avg_rating < 4 ? 'low-rating' : ''}>{s.avg_rating}</span><b>{money.format(s.revenue)}</b></div>)}</div></Panel>
+        <Panel title="Data integrity" subtitle="Documented source quality checks; raw records remain preserved"><div className="quality-grid"><div><b>{money.format(data.data_quality.orders_without_items)}</b><span>Orders without items</span></div><div><b>{money.format(data.data_quality.orders_without_payment)}</b><span>Orders without payment</span></div><div><b>{money.format(data.data_quality.duplicate_payment_order_rows)}</b><span>Extra payment rows aggregated</span></div><div><b>{money.format(data.data_quality.duplicate_review_order_rows)}</b><span>Extra review rows aggregated</span></div><div><b>{money.format(data.data_quality.uncategorized_products)}</b><span>Unclassified products</span></div><div><b>{money.format(data.data_quality.sellers_without_location)}</b><span>Sellers with unknown label</span></div></div></Panel>
       </section>
       <footer>Built from reproducible project extracts · <span>Payment revenue and item revenue are intentionally labelled separately.</span></footer>
     </main>

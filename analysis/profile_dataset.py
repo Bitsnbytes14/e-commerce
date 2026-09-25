@@ -205,6 +205,7 @@ dashboard_data = {
     "kpis": checks["business_kpis_delivered_orders"],
     "customer_behavior": checks["customer_behavior"],
     "date_coverage": checks["date_coverage"],
+    "data_quality": checks["data_quality"],
     "monthly": [
         {"month": row.purchase_month, "revenue": money(row.revenue), "orders": int(row.orders)}
         for row in monthly.itertuples(index=False)

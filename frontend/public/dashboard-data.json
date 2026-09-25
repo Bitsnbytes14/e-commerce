@@ -18,6 +18,15 @@
     "first_purchase": "2016-09-04 21:15:00",
     "last_purchase": "2018-10-17 17:30:00"
   },
+  "data_quality": {
+    "orders_without_items": 775,
+    "orders_without_payment": 1,
+    "duplicate_review_order_rows": 559,
+    "duplicate_payment_order_rows": 4446,
+    "uncategorized_products": 623,
+    "sellers_without_location": 57,
+    "missing_delivered_timestamp": 2965
+  },
   "monthly": [
     {
       "month": "2016-09",
