@@ -6,6 +6,7 @@ import './quality.css'
 const money = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
 const decimal = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 const chartColors = ['#14b8a6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#64748b']
+const savedFilters = new URLSearchParams(window.location.search)
 
 function downloadCsv(rows, filename) {
   const header = 'month,payment_revenue,completed_orders'
@@ -28,9 +29,9 @@ function Panel({ title, subtitle, children, className = '' }) {
 function App() {
   const [data, setData] = useState(null)
   const [page, setPage] = useState('Overview')
-  const [category, setCategory] = useState('All categories')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [category, setCategory] = useState(savedFilters.get('category') ?? 'All categories')
+  const [startDate, setStartDate] = useState(savedFilters.get('start') ?? '')
+  const [endDate, setEndDate] = useState(savedFilters.get('end') ?? '')
   useEffect(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
     const query = new URLSearchParams()
@@ -43,6 +44,13 @@ function App() {
       fetch(overviewUrl).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`${apiBase}/api/quality`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([staticData, overview, quality]) => setData({ ...staticData, ...(overview ? { kpis: overview.kpis, monthly: overview.monthly } : {}), ...(quality ? { data_quality: quality.data_quality } : {}) }))
+  }, [startDate, endDate, category])
+  useEffect(() => {
+    const query = new URLSearchParams()
+    if (startDate) query.set('start', startDate)
+    if (endDate) query.set('end', endDate)
+    if (category !== 'All categories') query.set('category', category)
+    window.history.replaceState(null, '', `${window.location.pathname}${query.size ? `?${query}` : ''}`)
   }, [startDate, endDate, category])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
