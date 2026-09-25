@@ -56,6 +56,52 @@ The script does not change the raw files in `archive/`. It validates the source 
 5. Do not physically join `Item_Detail.csv` to `Payments.csv` or raw review records: this creates many-to-many fan-out and inflates values.
 6. Follow the data model, calculated-field definitions, dashboard wireframe, insight wording, methodology, presentation outline, and viva questions in [CA3_TABLEAU_PROJECT_GUIDE.md](CA3_TABLEAU_PROJECT_GUIDE.md).
 
+## Run the web dashboard
+
+The `frontend/` directory contains a responsive React + Vite analytics dashboard. It displays the validated project metrics, monthly performance, payment mix, category performance, delivery experience, cross-sell opportunities, and seller scorecard.
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite (normally `http://localhost:5173`). To create a production build, run:
+
+```powershell
+npm run build
+```
+
+The dashboard reads `frontend/public/dashboard-data.json`. Regenerate it along with the analytical extracts by returning to the repository root and running `python analysis/profile_dataset.py`.
+
+## Run the API and analytical database
+
+The FastAPI service provides production-style, read-only endpoints for health checks, quality metadata, KPIs/trends, categories, and sellers. Build the SQLite database after regenerating extracts:
+
+```powershell
+python backend/build_database.py
+uvicorn backend.app:app --reload
+```
+
+The API is then available at `http://127.0.0.1:8000`, with interactive OpenAPI documentation at `/docs`. Start the frontend in another terminal; Vite proxies `/api` requests to this local service. For a separate deployed API, set `VITE_API_BASE_URL` to its public origin.
+
+## Verification and continuous integration
+
+```powershell
+python -m unittest backend/test_api.py
+cd frontend
+npm run lint
+npm run build
+```
+
+GitHub Actions repeats the extract generation, API checks, linting, and production build for pushes and pull requests. The database itself is intentionally ignored because it is reproducibly built from versioned extracts.
+
+## Deployment
+
+1. Deploy the repository root to Render using `render.yaml`; it provisions the API, regenerates the extracts/database, and exposes `/api/health`.
+2. Deploy `frontend/` to Vercel. Set the build command to `npm run build`, the output directory to `dist`, and environment variable `VITE_API_BASE_URL` to the Render API origin (for example, `https://commerceiq-api.onrender.com`).
+3. Verify `/api/health`, `/docs`, the deployed dashboard, and the location-disclaimer text before sharing the URL.
+
 ## Validated baseline (delivered orders)
 
 | Metric | Value |

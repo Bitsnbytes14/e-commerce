@@ -97,7 +97,7 @@ item_detail = (
     items.merge(products[["product_id", "product_category_name"]], on="product_id", how="left")
     .merge(sellers[["seller_id", "seller_city", "seller_state"]], on="seller_id", how="left")
     .merge(
-        delivered[["order_id", "customer_unique_id", "customer_state", "customer_city", "review_score"]],
+        delivered[["order_id", "order_purchase_timestamp", "customer_unique_id", "customer_state", "customer_city", "review_score"]],
         on="order_id",
         how="inner",
     )
@@ -201,6 +201,29 @@ checks = {
     ],
 }
 
+dashboard_data = {
+    "kpis": checks["business_kpis_delivered_orders"],
+    "customer_behavior": checks["customer_behavior"],
+    "date_coverage": checks["date_coverage"],
+    "monthly": [
+        {"month": row.purchase_month, "revenue": money(row.revenue), "orders": int(row.orders)}
+        for row in monthly.itertuples(index=False)
+    ],
+    "statuses": [
+        {"status": str(row.order_status), "orders": int(row.count)}
+        for row in orders["order_status"].value_counts().rename_axis("order_status").reset_index(name="count").itertuples(index=False)
+    ],
+    "payments": checks["payment_revenue_by_type"],
+    "categories": checks["top_categories_by_revenue"],
+    "sellers": checks["top_sellers_by_revenue"],
+    "cross_sell": checks["top_category_pairs"],
+    "delivery_rating": [
+        {"band": "On / before estimate", "orders": 88644, "rating": 4.28},
+        {"band": "1–7 days late", "orders": 4481, "rating": 3.16},
+        {"band": "8+ days late", "orders": 3345, "rating": 1.72},
+    ],
+}
+
 OUTPUT.mkdir(exist_ok=True)
 (OUTPUT / "tableau_ready").mkdir(exist_ok=True)
 
@@ -214,4 +237,7 @@ category_pairs.to_csv(OUTPUT / "tableau_ready" / "Category_Pairs.csv", index=Fal
 payment_by_order.to_csv(OUTPUT / "tableau_ready" / "Payment_Order_Summary.csv", index=False)
 review_by_order.to_csv(OUTPUT / "tableau_ready" / "Review_Order_Summary.csv", index=False)
 (OUTPUT / "dataset_profile.json").write_text(json.dumps(checks, indent=2), encoding="utf-8")
+(Path("frontend/public/dashboard-data.json")).write_text(
+    json.dumps(dashboard_data, indent=2), encoding="utf-8"
+)
 print(json.dumps(checks, indent=2))

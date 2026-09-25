@@ -1,0 +1,392 @@
+{
+  "kpis": {
+    "orders": 96478,
+    "unique_customers": 93358,
+    "payment_revenue": 15422461.77,
+    "average_order_value": 159.86,
+    "items": 110197,
+    "average_review_score": 4.14,
+    "average_delivery_days": 12.56,
+    "on_or_before_estimated_delivery_pct": 91.88
+  },
+  "customer_behavior": {
+    "customers_with_delivered_order": 93358,
+    "repeat_customers": 2801,
+    "repeat_customer_rate_pct": 3.0
+  },
+  "date_coverage": {
+    "first_purchase": "2016-09-04 21:15:00",
+    "last_purchase": "2018-10-17 17:30:00"
+  },
+  "monthly": [
+    {
+      "month": "2016-09",
+      "revenue": 0.0,
+      "orders": 1
+    },
+    {
+      "month": "2016-10",
+      "revenue": 46566.71,
+      "orders": 265
+    },
+    {
+      "month": "2016-12",
+      "revenue": 19.62,
+      "orders": 1
+    },
+    {
+      "month": "2017-01",
+      "revenue": 127545.67,
+      "orders": 750
+    },
+    {
+      "month": "2017-02",
+      "revenue": 271298.65,
+      "orders": 1653
+    },
+    {
+      "month": "2017-03",
+      "revenue": 414369.39,
+      "orders": 2546
+    },
+    {
+      "month": "2017-04",
+      "revenue": 390952.18,
+      "orders": 2303
+    },
+    {
+      "month": "2017-05",
+      "revenue": 567066.73,
+      "orders": 3546
+    },
+    {
+      "month": "2017-06",
+      "revenue": 490225.6,
+      "orders": 3135
+    },
+    {
+      "month": "2017-07",
+      "revenue": 566403.93,
+      "orders": 3872
+    },
+    {
+      "month": "2017-08",
+      "revenue": 646000.61,
+      "orders": 4193
+    },
+    {
+      "month": "2017-09",
+      "revenue": 701169.99,
+      "orders": 4150
+    },
+    {
+      "month": "2017-10",
+      "revenue": 751140.27,
+      "orders": 4478
+    },
+    {
+      "month": "2017-11",
+      "revenue": 1153528.05,
+      "orders": 7289
+    },
+    {
+      "month": "2017-12",
+      "revenue": 843199.17,
+      "orders": 5513
+    },
+    {
+      "month": "2018-01",
+      "revenue": 1078606.86,
+      "orders": 7069
+    },
+    {
+      "month": "2018-02",
+      "revenue": 966510.88,
+      "orders": 6555
+    },
+    {
+      "month": "2018-03",
+      "revenue": 1120678.0,
+      "orders": 7003
+    },
+    {
+      "month": "2018-04",
+      "revenue": 1132933.95,
+      "orders": 6798
+    },
+    {
+      "month": "2018-05",
+      "revenue": 1128836.69,
+      "orders": 6749
+    },
+    {
+      "month": "2018-06",
+      "revenue": 1012090.68,
+      "orders": 6099
+    },
+    {
+      "month": "2018-07",
+      "revenue": 1027903.86,
+      "orders": 6159
+    },
+    {
+      "month": "2018-08",
+      "revenue": 985414.28,
+      "orders": 6351
+    }
+  ],
+  "statuses": [
+    {
+      "status": "delivered",
+      "orders": 96478
+    },
+    {
+      "status": "shipped",
+      "orders": 1107
+    },
+    {
+      "status": "canceled",
+      "orders": 625
+    },
+    {
+      "status": "unavailable",
+      "orders": 609
+    },
+    {
+      "status": "invoiced",
+      "orders": 314
+    },
+    {
+      "status": "processing",
+      "orders": 301
+    },
+    {
+      "status": "created",
+      "orders": 5
+    },
+    {
+      "status": "approved",
+      "orders": 2
+    }
+  ],
+  "payments": [
+    {
+      "payment_type": "credit_card",
+      "revenue": 12542084.19,
+      "share_pct": 78.34
+    },
+    {
+      "payment_type": "UPI",
+      "revenue": 2869361.27,
+      "share_pct": 17.92
+    },
+    {
+      "payment_type": "voucher",
+      "revenue": 379436.87,
+      "share_pct": 2.37
+    },
+    {
+      "payment_type": "debit_card",
+      "revenue": 217989.79,
+      "share_pct": 1.36
+    },
+    {
+      "payment_type": "not_defined",
+      "revenue": 0.0,
+      "share_pct": 0.0
+    }
+  ],
+  "categories": [
+    {
+      "category": "Health_Beauty",
+      "revenue": 1412089.53,
+      "units": 9465,
+      "avg_rating": 4.18
+    },
+    {
+      "category": "Watches_Gifts",
+      "revenue": 1264333.12,
+      "units": 5859,
+      "avg_rating": 4.06
+    },
+    {
+      "category": "Bed_Bath_Table",
+      "revenue": 1225209.26,
+      "units": 10953,
+      "avg_rating": 3.9
+    },
+    {
+      "category": "Sports_Leisure",
+      "revenue": 1118256.91,
+      "units": 8431,
+      "avg_rating": 4.15
+    },
+    {
+      "category": "Computers_Accessories",
+      "revenue": 1032723.77,
+      "units": 7644,
+      "avg_rating": 3.98
+    },
+    {
+      "category": "Furniture_Decor",
+      "revenue": 880329.92,
+      "units": 8160,
+      "avg_rating": 3.94
+    },
+    {
+      "category": "Housewares",
+      "revenue": 758392.25,
+      "units": 6795,
+      "avg_rating": 4.09
+    },
+    {
+      "category": "Cool_Stuff",
+      "revenue": 691680.89,
+      "units": 3718,
+      "avg_rating": 4.18
+    },
+    {
+      "category": "Auto",
+      "revenue": 669454.75,
+      "units": 4140,
+      "avg_rating": 4.09
+    },
+    {
+      "category": "Garden_Tools",
+      "revenue": 567145.68,
+      "units": 4268,
+      "avg_rating": 4.07
+    }
+  ],
+  "sellers": [
+    {
+      "seller_id": "4869f7a5dfa277a7dca6462dcf3b52b2",
+      "revenue": 247007.06,
+      "orders": 1124,
+      "avg_rating": 4.13
+    },
+    {
+      "seller_id": "7c67e1448b00f6e969d365cea6b010ab",
+      "revenue": 237806.69,
+      "orders": 973,
+      "avg_rating": 3.34
+    },
+    {
+      "seller_id": "4a3ca9315b744ce9f8e9374361493884",
+      "revenue": 231220.43,
+      "orders": 1772,
+      "avg_rating": 3.8
+    },
+    {
+      "seller_id": "53243585a1d6dc2643021fd1853d8905",
+      "revenue": 230797.02,
+      "orders": 348,
+      "avg_rating": 4.12
+    },
+    {
+      "seller_id": "fa1c13f2614d7b5c4749cbc52fecda94",
+      "revenue": 200833.5,
+      "orders": 578,
+      "avg_rating": 4.36
+    },
+    {
+      "seller_id": "da8622b14eb17ae2831f4ac5b9dab84a",
+      "revenue": 184706.78,
+      "orders": 1311,
+      "avg_rating": 4.06
+    },
+    {
+      "seller_id": "7e93a43ef30c4f03f38b393420bc753a",
+      "revenue": 171973.55,
+      "orders": 319,
+      "avg_rating": 4.35
+    },
+    {
+      "seller_id": "1025f0e2d44d7041d6cf58b6550e0bfa",
+      "revenue": 171924.96,
+      "orders": 910,
+      "avg_rating": 3.85
+    },
+    {
+      "seller_id": "7a67c85e85bb2ce8582c35f2203ad736",
+      "revenue": 160278.52,
+      "orders": 1145,
+      "avg_rating": 4.25
+    },
+    {
+      "seller_id": "955fee9216a65b617aa5c0531780ce60",
+      "revenue": 156606.48,
+      "orders": 1261,
+      "avg_rating": 4.07
+    }
+  ],
+  "cross_sell": [
+    {
+      "category_1": "Bed_Bath_Table",
+      "category_2": "Furniture_Decor",
+      "orders": 70
+    },
+    {
+      "category_1": "Bed_Bath_Table",
+      "category_2": "Home_Confort",
+      "orders": 43
+    },
+    {
+      "category_1": "Furniture_Decor",
+      "category_2": "Housewares",
+      "orders": 24
+    },
+    {
+      "category_1": "Baby",
+      "category_2": "Cool_Stuff",
+      "orders": 20
+    },
+    {
+      "category_1": "Bed_Bath_Table",
+      "category_2": "Housewares",
+      "orders": 20
+    },
+    {
+      "category_1": "Baby",
+      "category_2": "Toys",
+      "orders": 19
+    },
+    {
+      "category_1": "Baby",
+      "category_2": "Bed_Bath_Table",
+      "orders": 17
+    },
+    {
+      "category_1": "Furniture_Decor",
+      "category_2": "Garden_Tools",
+      "orders": 16
+    },
+    {
+      "category_1": "Health_Beauty",
+      "category_2": "Sports_Leisure",
+      "orders": 14
+    },
+    {
+      "category_1": "Housewares",
+      "category_2": "Unclassified",
+      "orders": 14
+    }
+  ],
+  "delivery_rating": [
+    {
+      "band": "On / before estimate",
+      "orders": 88644,
+      "rating": 4.28
+    },
+    {
+      "band": "1\u20137 days late",
+      "orders": 4481,
+      "rating": 3.16
+    },
+    {
+      "band": "8+ days late",
+      "orders": 3345,
+      "rating": 1.72
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+backend/commerceiq.db
+__pycache__/
+*.pyc

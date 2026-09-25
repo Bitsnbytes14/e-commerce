@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: commerceiq-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt && python analysis/profile_dataset.py && python backend/build_database.py
+    startCommand: uvicorn backend.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true
