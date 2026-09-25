@@ -36,13 +36,14 @@ function App() {
     const query = new URLSearchParams()
     if (startDate) query.set('start', startDate)
     if (endDate) query.set('end', endDate)
+    if (category !== 'All categories') query.set('category', category)
     const overviewUrl = `${apiBase}/api/overview${query.size ? `?${query}` : ''}`
     Promise.all([
       fetch('/dashboard-data.json').then(r => r.json()),
       fetch(overviewUrl).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`${apiBase}/api/quality`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([staticData, overview, quality]) => setData({ ...staticData, ...(overview ? { kpis: overview.kpis, monthly: overview.monthly } : {}), ...(quality ? { data_quality: quality.data_quality } : {}) }))
-  }, [startDate, endDate])
+  }, [startDate, endDate, category])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
   const k = data.kpis
@@ -58,7 +59,7 @@ function App() {
     <main className="content">
       <header className="topbar"><div><p className="eyebrow">PUBLIC E-COMMERCE MARKETPLACE</p><h1>{page} <span>Analytics</span></h1></div><div className="period"><span>◷</span><div><b>Data snapshot</b><small>Sep 2016 — Oct 2018</small></div></div></header>
       <div className="notice"><span>ⓘ</span> Completed-order dashboard. Location values are source-defined labels, not verified geography.</div>
-      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate) && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate('') }}>Reset dates</button>}</div><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select></section>
+      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders{category !== 'All categories' ? ' containing selected category' : ''}</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate) && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate('') }}>Reset dates</button>}</div><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select></section>
       <section className="metrics">
         <Card label="Payment revenue" value={money.format(k.payment_revenue)} hint="Delivered orders only" />
         <Card label="Completed orders" value={money.format(k.orders)} hint={`${money.format(k.unique_customers)} unique customers`} tone="blue" />

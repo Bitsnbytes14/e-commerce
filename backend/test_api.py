@@ -27,5 +27,10 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(body["scope"]["end"], "2017-01-31")
         self.assertLess(body["kpis"]["orders"], 96478)
 
+    def test_category_filter_restricts_to_matching_orders(self):
+        body = client.get("/api/overview?category=Health_Beauty").json()
+        self.assertEqual(body["scope"]["category"], "Health_Beauty")
+        self.assertLess(body["kpis"]["orders"], 96478)
+
 if __name__ == "__main__":
     unittest.main()
