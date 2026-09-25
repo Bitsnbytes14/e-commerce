@@ -84,7 +84,7 @@ function App() {
   }, [startDate, endDate, category, seller, paymentType, reviewBand, deliveryStatus])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (loadError) return <main className="loading"><div><b>Dashboard data could not load.</b><p>{loadError}</p><button onClick={() => window.location.reload()}>Retry</button></div></main>
-  if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
+  if (!data) return <main className="loading"><div className="loader-card" aria-live="polite"><div className="loader-brand"><span>↗</span> commerce<span>IQ</span></div><div className="loader-chart"><i></i><i></i><i></i><i></i><i></i></div><div className="loader-track"><b></b></div><strong>Building your marketplace view</strong><p>Validating orders, customers, sellers, and product insights…</p></div></main>
   const k = data.kpis
   const visibleCategories = category === 'All categories' ? categories : categories.filter(c => c.category === category)
   const pageFocus = {
