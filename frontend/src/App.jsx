@@ -37,6 +37,7 @@ function App() {
   const [startDate, setStartDate] = useState(savedFilters.get('start') ?? '')
   const [endDate, setEndDate] = useState(savedFilters.get('end') ?? '')
   const [loadError, setLoadError] = useState('')
+  const [details, setDetails] = useState([])
   useEffect(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
     const query = new URLSearchParams()
@@ -63,6 +64,13 @@ function App() {
     })
     return () => { cancelled = true }
   }, [startDate, endDate, category, seller, paymentType, reviewBand, deliveryStatus])
+  useEffect(() => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
+    const query = new URLSearchParams({ limit: '8' })
+    if (category !== 'All categories') query.set('category', category)
+    if (seller !== 'All sellers') query.set('seller', seller)
+    fetch(`${apiBase}/api/order-details?${query}`).then(r => r.ok ? r.json() : []).then(setDetails).catch(() => setDetails([]))
+  }, [category, seller])
   useEffect(() => {
     const query = new URLSearchParams()
     if (startDate) query.set('start', startDate)
@@ -105,6 +113,7 @@ function App() {
         <Panel title="Cross-sell opportunities" subtitle="Distinct category pairs in the same delivered order"><ol>{data.cross_sell.slice(0, 5).map((x, i) => <li key={`${x.category_1}-${x.category_2}`}><em>{String(i + 1).padStart(2, '0')}</em><div><b>{x.category_1.replaceAll('_', ' ')} <span>+</span> {x.category_2.replaceAll('_', ' ')}</b><small>Observed together in completed orders</small></div><strong>{x.orders}</strong></li>)}</ol></Panel>
         <Panel title="Seller scorecard" subtitle="Top sellers by item revenue and average rating"><div className="seller-table"><div className="seller-head"><span>Seller ID</span><span>Orders</span><span>Rating</span><span>Revenue</span></div>{data.sellers.slice(0, 5).map(s => <div className="seller-row" key={s.seller_id}><span title={s.seller_id}>{s.seller_id.slice(0, 8)}…</span><span>{money.format(s.orders)}</span><span className={s.avg_rating < 4 ? 'low-rating' : ''}>{s.avg_rating}</span><b>{money.format(s.revenue)}</b></div>)}</div></Panel>
         <Panel title="Data integrity" subtitle="Documented source quality checks; raw records remain preserved"><div className="quality-grid"><div><b>{money.format(data.data_quality.orders_without_items)}</b><span>Orders without items</span></div><div><b>{money.format(data.data_quality.orders_without_payment)}</b><span>Orders without payment</span></div><div><b>{money.format(data.data_quality.duplicate_payment_order_rows)}</b><span>Extra payment rows aggregated</span></div><div><b>{money.format(data.data_quality.duplicate_review_order_rows)}</b><span>Extra review rows aggregated</span></div><div><b>{money.format(data.data_quality.uncategorized_products)}</b><span>Unclassified products</span></div><div><b>{money.format(data.data_quality.sellers_without_location)}</b><span>Sellers with unknown label</span></div></div></Panel>
+        <Panel title="Order drill-down" subtitle="Latest matching item records for the selected category or seller"><div className="seller-table"><div className="seller-head"><span>Order</span><span>Category</span><span>Rating</span><span>Item value</span></div>{details.map(row => <div className="seller-row" key={`${row.order_id}-${row.item_revenue}`}><span title={row.order_id}>{row.order_id.slice(0, 8)}…</span><span>{row.category.replaceAll('_', ' ').slice(0, 14)}</span><span>{row.review_score}</span><b>{money.format(row.item_revenue)}</b></div>)}</div></Panel>
       </section>
       <footer>Built from reproducible project extracts · <span>Payment revenue and item revenue are intentionally labelled separately.</span></footer>
     </main>
