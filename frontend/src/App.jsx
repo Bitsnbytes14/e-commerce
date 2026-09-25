@@ -31,6 +31,9 @@ function App() {
   const [page, setPage] = useState('Overview')
   const [category, setCategory] = useState(savedFilters.get('category') ?? 'All categories')
   const [seller, setSeller] = useState(savedFilters.get('seller') ?? 'All sellers')
+  const [paymentType, setPaymentType] = useState(savedFilters.get('payment_type') ?? 'All payments')
+  const [reviewBand, setReviewBand] = useState(savedFilters.get('review_band') ?? 'All ratings')
+  const [deliveryStatus, setDeliveryStatus] = useState(savedFilters.get('delivery_status') ?? 'All delivery states')
   const [startDate, setStartDate] = useState(savedFilters.get('start') ?? '')
   const [endDate, setEndDate] = useState(savedFilters.get('end') ?? '')
   const [loadError, setLoadError] = useState('')
@@ -41,6 +44,9 @@ function App() {
     if (endDate) query.set('end', endDate)
     if (category !== 'All categories') query.set('category', category)
     if (seller !== 'All sellers') query.set('seller', seller)
+    if (paymentType !== 'All payments') query.set('payment_type', paymentType)
+    if (reviewBand !== 'All ratings') query.set('review_band', reviewBand)
+    if (deliveryStatus !== 'All delivery states') query.set('delivery_status', deliveryStatus)
     const overviewUrl = `${apiBase}/api/overview${query.size ? `?${query}` : ''}`
     let cancelled = false
     Promise.all([
@@ -56,15 +62,18 @@ function App() {
       if (!cancelled) setLoadError(error.message)
     })
     return () => { cancelled = true }
-  }, [startDate, endDate, category, seller])
+  }, [startDate, endDate, category, seller, paymentType, reviewBand, deliveryStatus])
   useEffect(() => {
     const query = new URLSearchParams()
     if (startDate) query.set('start', startDate)
     if (endDate) query.set('end', endDate)
     if (category !== 'All categories') query.set('category', category)
     if (seller !== 'All sellers') query.set('seller', seller)
+    if (paymentType !== 'All payments') query.set('payment_type', paymentType)
+    if (reviewBand !== 'All ratings') query.set('review_band', reviewBand)
+    if (deliveryStatus !== 'All delivery states') query.set('delivery_status', deliveryStatus)
     window.history.replaceState(null, '', `${window.location.pathname}${query.size ? `?${query}` : ''}`)
-  }, [startDate, endDate, category, seller])
+  }, [startDate, endDate, category, seller, paymentType, reviewBand, deliveryStatus])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (loadError) return <main className="loading"><div><b>Dashboard data could not load.</b><p>{loadError}</p><button onClick={() => window.location.reload()}>Retry</button></div></main>
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
@@ -81,7 +90,7 @@ function App() {
     <main className="content">
       <header className="topbar"><div><p className="eyebrow">PUBLIC E-COMMERCE MARKETPLACE</p><h1>{page} <span>Analytics</span></h1></div><div className="period"><span>◷</span><div><b>Data snapshot</b><small>Sep 2016 — Oct 2018</small></div></div></header>
       <div className="notice"><span>ⓘ</span> Completed-order dashboard. Location values are source-defined labels, not verified geography.</div>
-      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders{category !== 'All categories' || seller !== 'All sellers' ? ' containing selected filters' : ''}</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate || category !== 'All categories' || seller !== 'All sellers') && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate(''); setCategory('All categories'); setSeller('All sellers') }}>Reset filters</button>}</div><div className="dimension-selects"><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select><select value={seller} onChange={e => setSeller(e.target.value)}><option>All sellers</option>{data.sellers.map(s => <option key={s.seller_id} value={s.seller_id}>Seller {s.seller_id.slice(0, 8)}…</option>)}</select></div></section>
+      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders with selected filters</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label><button className="reset-filter" onClick={() => { setStartDate(''); setEndDate(''); setCategory('All categories'); setSeller('All sellers'); setPaymentType('All payments'); setReviewBand('All ratings'); setDeliveryStatus('All delivery states') }}>Reset filters</button></div><div className="dimension-selects"><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select><select value={seller} onChange={e => setSeller(e.target.value)}><option>All sellers</option>{data.sellers.map(s => <option key={s.seller_id} value={s.seller_id}>Seller {s.seller_id.slice(0, 8)}…</option>)}</select><select value={paymentType} onChange={e => setPaymentType(e.target.value)}><option>All payments</option>{data.payments.map(p => <option key={p.payment_type} value={p.payment_type}>{p.payment_type}</option>)}</select><select value={reviewBand} onChange={e => setReviewBand(e.target.value)}><option>All ratings</option><option value="low">Low (1–2)</option><option value="neutral">Neutral (3)</option><option value="high">High (4–5)</option></select><select value={deliveryStatus} onChange={e => setDeliveryStatus(e.target.value)}><option>All delivery states</option><option value="on_time">On / before estimate</option><option value="late">Late</option></select></div></section>
       <section className="metrics">
         <Card label="Payment revenue" value={money.format(k.payment_revenue)} hint="Delivered orders only" />
         <Card label="Completed orders" value={money.format(k.orders)} hint={`${money.format(k.unique_customers)} unique customers`} tone="blue" />

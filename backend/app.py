@@ -38,6 +38,9 @@ def overview(
     end: Annotated[str | None, Query(description="Inclusive YYYY-MM-DD")] = None,
     category: Annotated[str | None, Query(description="Product category; filters to orders containing the category")] = None,
     seller: Annotated[str | None, Query(description="Seller ID; filters to orders containing the seller")] = None,
+    payment_type: Annotated[str | None, Query(description="Payment method; filters to orders containing the method")] = None,
+    review_band: Annotated[str | None, Query(description="One of low, neutral, high")] = None,
+    delivery_status: Annotated[str | None, Query(description="One of on_time, late")] = None,
 ):
     clauses, values = ["order_status = 'delivered'"], []
     if start:
@@ -50,6 +53,19 @@ def overview(
     if seller:
         clauses.append("order_id IN (SELECT DISTINCT order_id FROM items WHERE seller_id = ?)")
         values.append(seller)
+    if payment_type:
+        clauses.append("order_id IN (SELECT DISTINCT order_id FROM payments WHERE payment_type = ?)")
+        values.append(payment_type)
+    if review_band == "low":
+        clauses.append("review_score <= 2")
+    elif review_band == "neutral":
+        clauses.append("review_score = 3")
+    elif review_band == "high":
+        clauses.append("review_score >= 4")
+    if delivery_status == "on_time":
+        clauses.append("delivery_days_early_late <= 0")
+    elif delivery_status == "late":
+        clauses.append("delivery_days_early_late > 0")
     where = " AND ".join(clauses)
     kpi = rows(f"""SELECT COUNT(DISTINCT order_id) orders, COUNT(DISTINCT customer_unique_id) unique_customers,
         ROUND(SUM(payment_value), 2) payment_revenue, ROUND(AVG(payment_value), 2) average_order_value,
@@ -58,7 +74,7 @@ def overview(
         FROM orders WHERE {where}""", values)[0]
     monthly = rows(f"""SELECT substr(order_purchase_timestamp, 1, 7) month, ROUND(SUM(payment_value), 2) revenue,
         COUNT(DISTINCT order_id) orders FROM orders WHERE {where} GROUP BY 1 ORDER BY 1""", values)
-    return {"kpis": kpi, "monthly": monthly, "scope": {"start": start, "end": end, "category": category, "seller": seller, "status": "delivered"}}
+    return {"kpis": kpi, "monthly": monthly, "scope": {"start": start, "end": end, "category": category, "seller": seller, "payment_type": payment_type, "review_band": review_band, "delivery_status": delivery_status, "status": "delivered"}}
 
 @app.get("/api/categories")
 def categories(limit: Annotated[int, Query(ge=1, le=30)] = 10):
@@ -70,3 +86,15 @@ def categories(limit: Annotated[int, Query(ge=1, le=30)] = 10):
 def sellers(limit: Annotated[int, Query(ge=1, le=30)] = 10):
     return rows("""SELECT seller_id, ROUND(SUM(line_value), 2) revenue, COUNT(DISTINCT order_id) orders,
         ROUND(AVG(review_score), 2) avg_rating FROM items GROUP BY 1 ORDER BY revenue DESC LIMIT ?""", (limit,))
+
+@app.get("/api/order-details")
+def order_details(category: str | None = None, seller: str | None = None, limit: Annotated[int, Query(ge=1, le=100)] = 25):
+    clauses, values = ["1 = 1"], []
+    if category:
+        clauses.append("product_category_name = ?"); values.append(category)
+    if seller:
+        clauses.append("seller_id = ?"); values.append(seller)
+    values.append(limit)
+    return rows(f"""SELECT order_id, product_category_name category, seller_id, ROUND(line_value, 2) item_revenue,
+        ROUND(review_score, 1) review_score, order_purchase_timestamp FROM items WHERE {' AND '.join(clauses)}
+        ORDER BY order_purchase_timestamp DESC LIMIT ?""", values)
