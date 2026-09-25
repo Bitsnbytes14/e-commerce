@@ -37,6 +37,7 @@ def overview(
     start: Annotated[str | None, Query(description="Inclusive YYYY-MM-DD")] = None,
     end: Annotated[str | None, Query(description="Inclusive YYYY-MM-DD")] = None,
     category: Annotated[str | None, Query(description="Product category; filters to orders containing the category")] = None,
+    seller: Annotated[str | None, Query(description="Seller ID; filters to orders containing the seller")] = None,
 ):
     clauses, values = ["order_status = 'delivered'"], []
     if start:
@@ -46,6 +47,9 @@ def overview(
     if category:
         clauses.append("order_id IN (SELECT DISTINCT order_id FROM items WHERE product_category_name = ?)")
         values.append(category)
+    if seller:
+        clauses.append("order_id IN (SELECT DISTINCT order_id FROM items WHERE seller_id = ?)")
+        values.append(seller)
     where = " AND ".join(clauses)
     kpi = rows(f"""SELECT COUNT(DISTINCT order_id) orders, COUNT(DISTINCT customer_unique_id) unique_customers,
         ROUND(SUM(payment_value), 2) payment_revenue, ROUND(AVG(payment_value), 2) average_order_value,
@@ -54,7 +58,7 @@ def overview(
         FROM orders WHERE {where}""", values)[0]
     monthly = rows(f"""SELECT substr(order_purchase_timestamp, 1, 7) month, ROUND(SUM(payment_value), 2) revenue,
         COUNT(DISTINCT order_id) orders FROM orders WHERE {where} GROUP BY 1 ORDER BY 1""", values)
-    return {"kpis": kpi, "monthly": monthly, "scope": {"start": start, "end": end, "category": category, "status": "delivered"}}
+    return {"kpis": kpi, "monthly": monthly, "scope": {"start": start, "end": end, "category": category, "seller": seller, "status": "delivered"}}
 
 @app.get("/api/categories")
 def categories(limit: Annotated[int, Query(ge=1, le=30)] = 10):

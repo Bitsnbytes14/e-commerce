@@ -30,6 +30,7 @@ function App() {
   const [data, setData] = useState(null)
   const [page, setPage] = useState('Overview')
   const [category, setCategory] = useState(savedFilters.get('category') ?? 'All categories')
+  const [seller, setSeller] = useState(savedFilters.get('seller') ?? 'All sellers')
   const [startDate, setStartDate] = useState(savedFilters.get('start') ?? '')
   const [endDate, setEndDate] = useState(savedFilters.get('end') ?? '')
   const [loadError, setLoadError] = useState('')
@@ -39,6 +40,7 @@ function App() {
     if (startDate) query.set('start', startDate)
     if (endDate) query.set('end', endDate)
     if (category !== 'All categories') query.set('category', category)
+    if (seller !== 'All sellers') query.set('seller', seller)
     const overviewUrl = `${apiBase}/api/overview${query.size ? `?${query}` : ''}`
     let cancelled = false
     Promise.all([
@@ -54,14 +56,15 @@ function App() {
       if (!cancelled) setLoadError(error.message)
     })
     return () => { cancelled = true }
-  }, [startDate, endDate, category])
+  }, [startDate, endDate, category, seller])
   useEffect(() => {
     const query = new URLSearchParams()
     if (startDate) query.set('start', startDate)
     if (endDate) query.set('end', endDate)
     if (category !== 'All categories') query.set('category', category)
+    if (seller !== 'All sellers') query.set('seller', seller)
     window.history.replaceState(null, '', `${window.location.pathname}${query.size ? `?${query}` : ''}`)
-  }, [startDate, endDate, category])
+  }, [startDate, endDate, category, seller])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (loadError) return <main className="loading"><div><b>Dashboard data could not load.</b><p>{loadError}</p><button onClick={() => window.location.reload()}>Retry</button></div></main>
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
@@ -78,7 +81,7 @@ function App() {
     <main className="content">
       <header className="topbar"><div><p className="eyebrow">PUBLIC E-COMMERCE MARKETPLACE</p><h1>{page} <span>Analytics</span></h1></div><div className="period"><span>◷</span><div><b>Data snapshot</b><small>Sep 2016 — Oct 2018</small></div></div></header>
       <div className="notice"><span>ⓘ</span> Completed-order dashboard. Location values are source-defined labels, not verified geography.</div>
-      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders{category !== 'All categories' ? ' containing selected category' : ''}</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate) && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate('') }}>Reset dates</button>}</div><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select></section>
+      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders{category !== 'All categories' || seller !== 'All sellers' ? ' containing selected filters' : ''}</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate || category !== 'All categories' || seller !== 'All sellers') && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate(''); setCategory('All categories'); setSeller('All sellers') }}>Reset filters</button>}</div><div className="dimension-selects"><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select><select value={seller} onChange={e => setSeller(e.target.value)}><option>All sellers</option>{data.sellers.map(s => <option key={s.seller_id} value={s.seller_id}>Seller {s.seller_id.slice(0, 8)}…</option>)}</select></div></section>
       <section className="metrics">
         <Card label="Payment revenue" value={money.format(k.payment_revenue)} hint="Delivered orders only" />
         <Card label="Completed orders" value={money.format(k.orders)} hint={`${money.format(k.unique_customers)} unique customers`} tone="blue" />
