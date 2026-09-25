@@ -32,6 +32,7 @@ function App() {
   const [category, setCategory] = useState(savedFilters.get('category') ?? 'All categories')
   const [startDate, setStartDate] = useState(savedFilters.get('start') ?? '')
   const [endDate, setEndDate] = useState(savedFilters.get('end') ?? '')
+  const [loadError, setLoadError] = useState('')
   useEffect(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
     const query = new URLSearchParams()
@@ -39,11 +40,20 @@ function App() {
     if (endDate) query.set('end', endDate)
     if (category !== 'All categories') query.set('category', category)
     const overviewUrl = `${apiBase}/api/overview${query.size ? `?${query}` : ''}`
+    let cancelled = false
     Promise.all([
-      fetch('/dashboard-data.json').then(r => r.json()),
+      fetch('/dashboard-data.json').then(r => r.ok ? r.json() : Promise.reject(new Error('Validated dashboard data is unavailable.'))),
       fetch(overviewUrl).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`${apiBase}/api/quality`).then(r => r.ok ? r.json() : null).catch(() => null),
-    ]).then(([staticData, overview, quality]) => setData({ ...staticData, ...(overview ? { kpis: overview.kpis, monthly: overview.monthly } : {}), ...(quality ? { data_quality: quality.data_quality } : {}) }))
+    ]).then(([staticData, overview, quality]) => {
+      if (!cancelled) {
+        setLoadError('')
+        setData({ ...staticData, ...(overview ? { kpis: overview.kpis, monthly: overview.monthly } : {}), ...(quality ? { data_quality: quality.data_quality } : {}) })
+      }
+    }).catch(error => {
+      if (!cancelled) setLoadError(error.message)
+    })
+    return () => { cancelled = true }
   }, [startDate, endDate, category])
   useEffect(() => {
     const query = new URLSearchParams()
@@ -53,6 +63,7 @@ function App() {
     window.history.replaceState(null, '', `${window.location.pathname}${query.size ? `?${query}` : ''}`)
   }, [startDate, endDate, category])
   const categories = useMemo(() => data?.categories ?? [], [data])
+  if (loadError) return <main className="loading"><div><b>Dashboard data could not load.</b><p>{loadError}</p><button onClick={() => window.location.reload()}>Retry</button></div></main>
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
   const k = data.kpis
   const visibleCategories = category === 'All categories' ? categories : categories.filter(c => c.category === category)
