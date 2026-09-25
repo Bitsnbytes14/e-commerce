@@ -38,5 +38,17 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(body["scope"]["seller"], seller_id)
         self.assertLess(body["kpis"]["orders"], 96478)
 
+    def test_payment_rating_and_delivery_filters(self):
+        body = client.get("/api/overview?payment_type=credit_card&review_band=high&delivery_status=on_time").json()
+        self.assertEqual(body["scope"]["payment_type"], "credit_card")
+        self.assertEqual(body["scope"]["review_band"], "high")
+        self.assertEqual(body["scope"]["delivery_status"], "on_time")
+        self.assertGreater(body["kpis"]["orders"], 0)
+
+    def test_order_drill_down_returns_limited_records(self):
+        body = client.get("/api/order-details?category=Health_Beauty&limit=5").json()
+        self.assertEqual(len(body), 5)
+        self.assertTrue(all(row["category"] == "Health_Beauty" for row in body))
+
 if __name__ == "__main__":
     unittest.main()
