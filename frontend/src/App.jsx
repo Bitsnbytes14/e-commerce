@@ -24,7 +24,7 @@ function Card({ label, value, hint, tone = 'teal' }) {
   return <article className={`metric-card ${tone}`}><span>{label}</span><strong>{value}</strong><small>{hint}</small></article>
 }
 function Panel({ title, subtitle, children, className = '' }) {
-  return <section className={`panel ${className}`}><div className="panel-heading"><div><h2>{title}</h2><p>{subtitle}</p></div><span className="more">•••</span></div>{children}</section>
+  return <section className={`panel ${className}`}><div className="panel-heading"><div><h2>{title}</h2><p>{subtitle}</p></div></div>{children}</section>
 }
 
 function App() {
@@ -124,7 +124,8 @@ function App() {
     report.setFont('helvetica', 'normal'); report.setFontSize(10); report.setTextColor(61, 85, 105); report.text('Orders delivered on or before estimate average 4.28 rating; orders delivered 8+ days late average 1.72.', 42, 417, { maxWidth: 510 })
     report.setFont('helvetica', 'bold'); report.setTextColor(20, 55, 83); report.text('Recommended next step', 42, 465)
     report.setFont('helvetica', 'normal'); report.text('Monitor late-delivery exceptions and test proactive customer communication. This is a recommendation based on descriptive evidence, not a causal conclusion.', 42, 485, { maxWidth: 510 })
-    report.setTextColor(112, 128, 145); report.setFontSize(8); report.text('Source-defined location labels only; not verified geography. Generated from the current CommerceIQ dashboard filter scope.', 42, 780, { maxWidth: 510 })
+    report.setTextColor(112, 128, 145); report.setFontSize(8); report.text('Team: Mohammad Ahmad (PRN 23070122140) · Mitiksha Paliwal (PRN 23070122138) · Manav Dalwani (PRN 23070122132)', 42, 762, { maxWidth: 510 })
+    report.text('Source-defined location labels only; not verified geography. Generated from the current CommerceIQ dashboard filter scope.', 42, 780, { maxWidth: 510 })
     report.save('commerceiq-executive-report.pdf')
   }
 
@@ -133,7 +134,6 @@ function App() {
       <div className="brand"><span className="brand-mark">↗</span><div>commerce<span>IQ</span></div></div>
       <p className="workspace">MARKETPLACE INTELLIGENCE</p>
       <nav>{['Overview', 'Customers', 'Products', 'Sellers'].map(item => <button key={item} className={page === item ? 'nav-active' : ''} onClick={() => navigate(item)}><span>{item === 'Overview' ? '⌂' : item === 'Customers' ? '◌' : item === 'Products' ? '◇' : '◫'}</span>{item}</button>)}</nav>
-      <div className="sidebar-footer"><div className="avatar">CA</div><div><strong>CA3 Project</strong><small>Data analytics</small></div></div>
     </aside>
     <main className="content">
       <header className="topbar"><div><p className="eyebrow">PUBLIC E-COMMERCE MARKETPLACE</p><h1>{page} <span>Analytics</span></h1></div><div className="top-actions"><button onClick={() => setCommandOpen(true)}>⌘ Quick actions</button><button onClick={downloadPdfReport}>⇩ PDF report</button><button onClick={shareDashboard}>↗ Share</button><button onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀ Light' : '◐ Dark'}</button><div className="period"><span>●</span><div><b>Data verified</b><small>Snapshot Sep 2016 — Oct 2018</small></div></div></div></header>
@@ -157,7 +157,7 @@ function App() {
         <Panel title="Order drill-down" subtitle="Latest matching item records for the selected category or seller"><div className="seller-table"><div className="seller-head"><span>Order</span><span>Category</span><span>Rating</span><span>Item value</span></div>{details.map(row => <div className="seller-row" key={`${row.order_id}-${row.item_revenue}`}><span title={row.order_id}>{row.order_id.slice(0, 8)}…</span><span>{row.category.replaceAll('_', ' ').slice(0, 14)}</span><span>{row.review_score}</span><b>{money.format(row.item_revenue)}</b></div>)}</div></Panel>
         <Panel title="Decision lens" subtitle="Descriptive insight and recommended next step"><div className="decision-card"><strong>Delivery is the clearest service lever.</strong><p>Orders delivered on/before estimate average 4.28 rating; orders 8+ days late average 1.72.</p><span>Recommendation: monitor late-delivery exceptions and test proactive customer communication. This is an action hypothesis, not a causal claim.</span></div></Panel>
       </section>
-      <footer>Built from reproducible project extracts · <span>Payment revenue and item revenue are intentionally labelled separately.</span></footer>
+      <footer><b>Team:</b> Mohammad Ahmad · PRN 23070122140 &nbsp;|&nbsp; Mitiksha Paliwal · PRN 23070122138 &nbsp;|&nbsp; Manav Dalwani · PRN 23070122132<br/><span>Built from reproducible project extracts · Payment revenue and item revenue are intentionally labelled separately.</span></footer>
     </main>
     {commandOpen && <div className="command-backdrop" onClick={() => setCommandOpen(false)}><div className="command-menu" onClick={e => e.stopPropagation()}><b>Quick actions</b><small>Navigate or reset filters · Esc to close</small>{['Overview', 'Customers', 'Products', 'Sellers'].map(item => <button key={item} onClick={() => navigate(item)}>Go to {item}</button>)}<button onClick={() => { setStartDate(''); setEndDate(''); setCategory('All categories'); setSeller('All sellers'); setPaymentType('All payments'); setReviewBand('All ratings'); setDeliveryStatus('All delivery states'); setCommandOpen(false) }}>Reset all filters</button></div></div>}
     {tourOpen && <div className="tour"><button onClick={() => { localStorage.setItem('commerceiq-tour-seen', 'yes'); setTourOpen(false) }}>×</button><b>Welcome to CommerceIQ</b><span>Use filters to narrow the KPI scope, click a category bar to cross-filter, then export or share the resulting view.</span></div>}

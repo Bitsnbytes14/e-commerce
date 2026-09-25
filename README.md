@@ -4,6 +4,14 @@
 
 This repository contains a reproducible analysis of a public e-commerce marketplace dataset, Tableau-ready extracts, and complete CA3 project material.
 
+## Team
+
+| Member | PRN |
+|---|---:|
+| Mohammad Ahmad | 23070122140 |
+| Mitiksha Paliwal | 23070122138 |
+| Manav Dalwani | 23070122132 |
+
 > Accuracy note: source city, state, ZIP-prefix, and coordinate fields are not authenticated real-world geography. Treat them as source-defined labels only; do not present this dataset as Indian or make country-level geographic claims.
 
 ## Repository structure
