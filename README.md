@@ -27,10 +27,10 @@ render.yaml                      Render deployment configuration for the API
 - `pandas`
 - Tableau Desktop or Tableau Public (for workbook creation)
 
-Install the Python dependency:
+Install the API and analysis dependencies:
 
 ```powershell
-python -m pip install pandas
+python -m pip install -r backend/requirements.txt
 ```
 
 ## Run the analysis
