@@ -21,5 +21,11 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(len(body), 3)
         self.assertGreaterEqual(body[0]["revenue"], body[1]["revenue"])
 
+    def test_date_filter_changes_overview_scope(self):
+        body = client.get("/api/overview?start=2017-01-01&end=2017-01-31").json()
+        self.assertEqual(body["scope"]["start"], "2017-01-01")
+        self.assertEqual(body["scope"]["end"], "2017-01-31")
+        self.assertLess(body["kpis"]["orders"], 96478)
+
 if __name__ == "__main__":
     unittest.main()

@@ -17,13 +17,19 @@ function App() {
   const [data, setData] = useState(null)
   const [page, setPage] = useState('Overview')
   const [category, setCategory] = useState('All categories')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   useEffect(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
+    const query = new URLSearchParams()
+    if (startDate) query.set('start', startDate)
+    if (endDate) query.set('end', endDate)
+    const overviewUrl = `${apiBase}/api/overview${query.size ? `?${query}` : ''}`
     Promise.all([
       fetch('/dashboard-data.json').then(r => r.json()),
-      fetch(`${apiBase}/api/overview`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(overviewUrl).then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([staticData, overview]) => setData(overview ? { ...staticData, kpis: overview.kpis, monthly: overview.monthly } : staticData))
-  }, [])
+  }, [startDate, endDate])
   const categories = useMemo(() => data?.categories ?? [], [data])
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
   const k = data.kpis
@@ -39,7 +45,7 @@ function App() {
     <main className="content">
       <header className="topbar"><div><p className="eyebrow">PUBLIC E-COMMERCE MARKETPLACE</p><h1>{page} <span>Analytics</span></h1></div><div className="period"><span>◷</span><div><b>Data snapshot</b><small>Sep 2016 — Oct 2018</small></div></div></header>
       <div className="notice"><span>ⓘ</span> Completed-order dashboard. Location values are source-defined labels, not verified geography.</div>
-      <section className="controls"><div><button className="chip selected" onClick={() => setPage('Overview')}>Delivered orders</button><button className="chip">All source data</button></div><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select></section>
+      <section className="controls"><div className="scope-controls"><span className="chip selected">Delivered orders</span><label>From<input type="date" value={startDate} min="2016-09-04" max="2018-10-17" onChange={e => setStartDate(e.target.value)} /></label><label>To<input type="date" value={endDate} min="2016-09-04" max="2018-10-17" onChange={e => setEndDate(e.target.value)} /></label>{(startDate || endDate) && <button className="reset-filter" onClick={() => { setStartDate(''); setEndDate('') }}>Reset dates</button>}</div><select value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.map(c => <option key={c.category}>{c.category}</option>)}</select></section>
       <section className="metrics">
         <Card label="Payment revenue" value={money.format(k.payment_revenue)} hint="Delivered orders only" />
         <Card label="Completed orders" value={money.format(k.orders)} hint={`${money.format(k.unique_customers)} unique customers`} tone="blue" />
