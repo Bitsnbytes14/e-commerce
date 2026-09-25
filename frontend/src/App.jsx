@@ -87,6 +87,11 @@ function App() {
   if (!data) return <main className="loading">Loading validated marketplace analytics…</main>
   const k = data.kpis
   const visibleCategories = category === 'All categories' ? categories : categories.filter(c => c.category === category)
+  const pageFocus = {
+    Customers: { title: 'Customer retention', value: `${data.customer_behavior.repeat_customer_rate_pct}%`, text: 'repeat-customer rate across delivered-order customers. Use this view to evaluate acquisition and second-purchase opportunities.' },
+    Products: { title: 'Product performance', value: money.format(categories[0]?.revenue ?? 0), text: `item revenue from ${categories[0]?.category?.replaceAll('_', ' ') ?? 'the leading category'}. Review category ratings alongside volume before action.` },
+    Sellers: { title: 'Seller quality', value: `${decimal.format(data.sellers[0]?.avg_rating ?? 0)} / 5`, text: 'average rating for the leading seller by item revenue. Use the scorecard and drill-down to investigate performance.' },
+  }[page]
 
   return <div className="app-shell">
     <aside className="sidebar">
@@ -105,6 +110,7 @@ function App() {
         <Card label="Average order value" value={decimal.format(k.average_order_value)} hint="Payment revenue ÷ orders" tone="violet" />
         <Card label="Customer rating" value={`${decimal.format(k.average_review_score)} / 5`} hint="Mean order-level review" tone="amber" />
       </section>
+      {pageFocus && <section className="page-focus"><p>{pageFocus.title}</p><strong>{pageFocus.value}</strong><span>{pageFocus.text}</span></section>}
       <section className="dashboard-grid">
         <Panel title="Revenue movement" subtitle="Monthly payment revenue and delivered orders" className="trend-panel"><button className="export-button" onClick={() => downloadCsv(data.monthly, 'commerceiq-monthly-performance.csv')}>↓ Export CSV</button><ResponsiveContainer width="100%" height={270}><LineChart data={data.monthly} margin={{ top: 18, right: 8, left: 0 }}><CartesianGrid vertical={false} stroke="#e8edf4"/><XAxis dataKey="month" tick={{ fontSize: 11 }} interval="preserveStartEnd"/><YAxis yAxisId="left" tickFormatter={v => `${Math.round(v / 1000)}k`} tick={{ fontSize: 11 }}/><YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }}/><Tooltip formatter={(v, n) => [money.format(v), n]}/><Line yAxisId="left" type="monotone" dataKey="revenue" name="Revenue" stroke="#14b8a6" strokeWidth={3} dot={false}/><Line yAxisId="right" type="monotone" dataKey="orders" name="Orders" stroke="#3b82f6" strokeWidth={2} dot={false}/></LineChart></ResponsiveContainer></Panel>
         <Panel title="Payment mix" subtitle="Raw payment-component revenue share"><div className="donut-wrap"><ResponsiveContainer width="50%" height={205}><PieChart><Pie data={data.payments} dataKey="revenue" nameKey="payment_type" innerRadius={54} outerRadius={78} paddingAngle={3}>{data.payments.map((x, i) => <Cell key={x.payment_type} fill={chartColors[i]} />)}</Pie><Tooltip formatter={v => money.format(v)} /></PieChart></ResponsiveContainer><div className="legend">{data.payments.slice(0, 4).map((x, i) => <div key={x.payment_type}><i style={{ background: chartColors[i] }}></i><span>{x.payment_type.replace('_', ' ')}</span><b>{x.share_pct}%</b></div>)}</div></div></Panel>
